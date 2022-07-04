@@ -173,7 +173,7 @@ _worker_js__WEBPACK_IMPORTED_MODULE_4__.default.prototype.toPdf = function toPdf
               options.x = 0; // Increase the y value to capture only the 'current' page
               // -1 to be exclusive to the current page's content
 
-              options.y = page * (pxPageHeight - 1);
+              options.y = page * pxPageHeight;
               _context.next = 20;
               return html2canvas__WEBPACK_IMPORTED_MODULE_6__(this.prop.container, options);
 

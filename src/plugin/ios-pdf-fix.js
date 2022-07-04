@@ -43,7 +43,7 @@ Worker.prototype.toPdf = function toPdf() {
       options.x = 0;
       // Increase the y value to capture only the 'current' page
       // -1 to be exclusive to the current page's content
-      options.y = page * (pxPageHeight - 1);
+      options.y = page * pxPageHeight;
 
       var canvas = await html2canvas(this.prop.container, options);
 
