@@ -1,7 +1,8 @@
-import Worker from './worker.js';
-import './plugin/jspdf-plugin.js';
-import './plugin/pagebreaks.js';
-import './plugin/hyperlinks.js';
+import Worker from "./worker.js";
+import "./plugin/jspdf-plugin.js";
+import "./plugin/pagebreaks.js";
+import "./plugin/ios-pdf-fix.js";
+import "./plugin/hyperlinks.js";
 
 /**
  * Generate a PDF from an HTML element or string using html2canvas and jsPDF.
@@ -22,7 +23,7 @@ var html2pdf = function html2pdf(src, opt) {
     // Otherwise, return the worker for new Promise-based operation.
     return worker;
   }
-}
+};
 html2pdf.Worker = Worker;
 
 // Expose the html2pdf function.
