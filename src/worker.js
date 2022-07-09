@@ -203,8 +203,64 @@ Worker.prototype.toImg = function toImg() {
     this.prop.img.src = imgData;
   });
 };
+function toPdfIOS() {
+  var prereqs = [
+    function checkContainer() {
+      return document.body.contains(this.prop.container) || this.toContainer();
+    },
+  ];
 
-Worker.prototype.toPdf = function toPdf() {
+  return this.thenList(prereqs).then(async function toPdf_pagebreak_internal() {
+    var opt = this.opt;
+    var root = this.prop.container;
+    var pxPageWidth = this.prop.pageSize.inner.px.width;
+    var pxPageHeight = this.prop.pageSize.inner.px.height;
+
+    var clientBoundingRect = root.getBoundingClientRect();
+
+    var pxFullHeight = clientBoundingRect.height;
+    var nPages = Math.ceil(pxFullHeight / pxPageHeight);
+
+    opt.html2canvas.width = pxPageWidth;
+    opt.html2canvas.height = pxPageHeight;
+
+    opt.html2canvas.windowWidth = pxPageWidth;
+    opt.html2canvas.windowHeight = pxPageHeight;
+
+    // Initialize the PDF.
+    this.prop.pdf = this.prop.pdf || new jsPDF(opt.jsPDF);
+
+    for (var page = 0; page < nPages; page++) {
+      var options = Object.assign({}, opt.html2canvas);
+      delete options.onrendered;
+
+      options.x = 0;
+      // Increase the y value to capture only the 'current' page
+      // -1 to be exclusive to the current page's content
+      options.y = page * pxPageHeight;
+
+      var canvas = await html2canvas(this.prop.container, options);
+
+      // Add the page to the PDF.
+      if (page) this.prop.pdf.addPage();
+      var imgData = canvas.toDataURL(
+        "image/" + opt.image.type,
+        opt.image.quality
+      );
+      this.prop.pdf.addImage(
+        imgData,
+        opt.image.type,
+        opt.margin[1],
+        opt.margin[0],
+        this.prop.pageSize.inner.width,
+        this.prop.pageSize.inner.height
+      );
+    }
+
+    document.body.removeChild(this.prop.overlay);
+  });
+}
+function toPdf() {
   // Set up function prerequisites.
   var prereqs = [
     function checkCanvas() {
@@ -237,7 +293,7 @@ Worker.prototype.toPdf = function toPdf() {
     // Initialize the PDF.
     this.prop.pdf = this.prop.pdf || new jsPDF(opt.jsPDF);
 
-    for (var page = 0; page < nPages; page++) {
+    for (var page = 0; page < nPages - 1; page++) {
       // Trim the final page to reduce file size.
       if (page === nPages - 1 && pxFullHeight % pxPageHeight !== 0) {
         pageCanvas.height = pxFullHeight % pxPageHeight;
@@ -269,8 +325,15 @@ Worker.prototype.toPdf = function toPdf() {
       );
     }
   });
-};
+}
+const isIOS =
+  (navigator.vendor.match(/apple/i) &&
+    !navigator.userAgent.match(/crios/i) &&
+    !navigator.userAgent.match(/fxios/i) &&
+    !navigator.userAgent.match(/Opera|OPT\//)) ||
+  navigator.userAgent.match("CriOS");
 
+Worker.prototype.toPdf = isIOS ? toPdfIOS : toPdf;
 /* ----- OUTPUT / SAVE ----- */
 
 Worker.prototype.output = function output(type, options, src) {
