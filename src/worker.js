@@ -326,12 +326,7 @@ function toPdf() {
     }
   });
 }
-const isIOS =
-  (navigator.vendor.match(/apple/i) &&
-    !navigator.userAgent.match(/crios/i) &&
-    !navigator.userAgent.match(/fxios/i) &&
-    !navigator.userAgent.match(/Opera|OPT\//)) ||
-  navigator.userAgent.match("CriOS");
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
 Worker.prototype.toPdf = isIOS ? toPdfIOS : toPdf;
 /* ----- OUTPUT / SAVE ----- */
