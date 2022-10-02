@@ -203,6 +203,7 @@ Worker.prototype.toImg = function toImg() {
     this.prop.img.src = imgData;
   });
 };
+
 function toPdfIOS() {
   var prereqs = [
     function checkContainer() {
@@ -260,6 +261,7 @@ function toPdfIOS() {
     document.body.removeChild(this.prop.overlay);
   });
 }
+
 function toPdf() {
   // Set up function prerequisites.
   var prereqs = [
@@ -327,7 +329,7 @@ function toPdf() {
   });
 }
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
+console.log("Enviroment", isIOS);
 Worker.prototype.toPdf = isIOS ? toPdfIOS : toPdf;
 /* ----- OUTPUT / SAVE ----- */
 
