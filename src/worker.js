@@ -214,8 +214,8 @@ function toPdfIOS() {
   return this.thenList(prereqs).then(async function toPdf_pagebreak_internal() {
     var opt = this.opt;
     var root = this.prop.container;
-    var pxPageWidth = this.prop.pageSize.inner.px.width;
-    var pxPageHeight = this.prop.pageSize.inner.px.height;
+    var pxPageWidth = this.prop.pageSize.inner.px.widthExact;
+    var pxPageHeight = this.prop.pageSize.inner.px.heightExact;
 
     var clientBoundingRect = root.getBoundingClientRect();
 
@@ -295,7 +295,7 @@ function toPdf() {
     // Initialize the PDF.
     this.prop.pdf = this.prop.pdf || new jsPDF(opt.jsPDF);
 
-    for (var page = 0; page < nPages - 1; page++) {
+    for (var page = 0; page < nPages; page++) {
       // Trim the final page to reduce file size.
       if (page === nPages - 1 && pxFullHeight % pxPageHeight !== 0) {
         pageCanvas.height = pxFullHeight % pxPageHeight;
@@ -329,7 +329,6 @@ function toPdf() {
   });
 }
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-console.log("Enviroment", isIOS);
 Worker.prototype.toPdf = isIOS ? toPdfIOS : toPdf;
 /* ----- OUTPUT / SAVE ----- */
 
@@ -489,8 +488,10 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
         height: pageSize.height - this.opt.margin[0] - this.opt.margin[2],
       };
       pageSize.inner.px = {
-        width: toPx(pageSize.inner.width, pageSize.k),
-        height: toPx(pageSize.inner.height, pageSize.k),
+        width: toPx(pageSize.inner.width, pageSize.k, true),
+        height: toPx(pageSize.inner.height, pageSize.k, true),
+        widthExact: toPx(pageSize.inner.width, pageSize.k, false),
+        heightExact: toPx(pageSize.inner.height, pageSize.k, false),
       };
       pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
     }

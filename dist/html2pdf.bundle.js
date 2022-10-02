@@ -1428,7 +1428,7 @@ var orig = {
 }; // Add pagebreak default options to the Worker template.
 
 _worker_js__WEBPACK_IMPORTED_MODULE_5__.default.template.opt.pagebreak = {
-  mode: ['css', 'legacy'],
+  mode: ["css", "legacy"],
   before: [],
   after: [],
   avoid: []
@@ -1437,31 +1437,32 @@ _worker_js__WEBPACK_IMPORTED_MODULE_5__.default.template.opt.pagebreak = {
 _worker_js__WEBPACK_IMPORTED_MODULE_5__.default.prototype.toContainer = function toContainer() {
   return orig.toContainer.call(this).then(function toContainer_pagebreak() {
     // Setup root element and inner page height.
-    var root = this.prop.container;
-    var pxPageHeight = this.prop.pageSize.inner.px.height; // Check all requested modes.
+    var root = this.prop.container; // avoid rounding errors by using the exact height in px
+
+    var pxPageHeight = this.prop.pageSize.inner.px.heightExact; // Check all requested modes.
 
     var modeSrc = [].concat(this.opt.pagebreak.mode);
     var mode = {
-      avoidAll: modeSrc.indexOf('avoid-all') !== -1,
-      css: modeSrc.indexOf('css') !== -1,
-      legacy: modeSrc.indexOf('legacy') !== -1
+      avoidAll: modeSrc.indexOf("avoid-all") !== -1,
+      css: modeSrc.indexOf("css") !== -1,
+      legacy: modeSrc.indexOf("legacy") !== -1
     }; // Get arrays of all explicitly requested elements.
 
     var select = {};
     var self = this;
-    ['before', 'after', 'avoid'].forEach(function (key) {
-      var all = mode.avoidAll && key === 'avoid';
+    ["before", "after", "avoid"].forEach(function (key) {
+      var all = mode.avoidAll && key === "avoid";
       select[key] = all ? [] : [].concat(self.opt.pagebreak[key] || []);
 
       if (select[key].length > 0) {
-        select[key] = Array.prototype.slice.call(root.querySelectorAll(select[key].join(', ')));
+        select[key] = Array.prototype.slice.call(root.querySelectorAll(select[key].join(", ")));
       }
     }); // Get all legacy page-break elements.
 
-    var legacyEls = root.querySelectorAll('.html2pdf__page-break');
+    var legacyEls = root.querySelectorAll(".html2pdf__page-break");
     legacyEls = Array.prototype.slice.call(legacyEls); // Loop through all elements.
 
-    var els = root.querySelectorAll('*');
+    var els = root.querySelectorAll("*");
     Array.prototype.forEach.call(els, function pagebreak_loop(el) {
       // Setup pagebreak rules based on legacy and avoidAll modes.
       var rules = {
@@ -1475,8 +1476,8 @@ _worker_js__WEBPACK_IMPORTED_MODULE_5__.default.prototype.toContainer = function
         var style = window.getComputedStyle(el); // TODO: Handle 'left' and 'right' correctly.
         // TODO: Add support for 'avoid' on breakBefore/After.
 
-        var breakOpt = ['always', 'page', 'left', 'right'];
-        var avoidOpt = ['avoid', 'avoid-page'];
+        var breakOpt = ["always", "page", "left", "right"];
+        var avoidOpt = ["avoid", "avoid-page"];
         rules = {
           before: rules.before || breakOpt.indexOf(style.breakBefore || style.pageBreakBefore) !== -1,
           after: rules.after || breakOpt.indexOf(style.breakAfter || style.pageBreakAfter) !== -1,
@@ -1504,10 +1505,10 @@ _worker_js__WEBPACK_IMPORTED_MODULE_5__.default.prototype.toContainer = function
 
 
       if (rules.before) {
-        var pad = (0,_utils_js__WEBPACK_IMPORTED_MODULE_6__.createElement)('div', {
+        var pad = (0,_utils_js__WEBPACK_IMPORTED_MODULE_6__.createElement)("div", {
           style: {
-            display: 'block',
-            height: pxPageHeight - clientRect.top % pxPageHeight + 'px'
+            display: "block",
+            height: Math.floor(pxPageHeight - clientRect.top % pxPageHeight) + "px"
           }
         });
         el.parentNode.insertBefore(pad, el);
@@ -1515,10 +1516,10 @@ _worker_js__WEBPACK_IMPORTED_MODULE_5__.default.prototype.toContainer = function
 
 
       if (rules.after) {
-        var pad = (0,_utils_js__WEBPACK_IMPORTED_MODULE_6__.createElement)('div', {
+        var pad = (0,_utils_js__WEBPACK_IMPORTED_MODULE_6__.createElement)("div", {
           style: {
-            display: 'block',
-            height: pxPageHeight - clientRect.bottom % pxPageHeight + 'px'
+            display: "block",
+            height: Math.floor(pxPageHeight - clientRect.bottom % pxPageHeight) + "px"
           }
         });
         el.parentNode.insertBefore(pad, el.nextSibling);
@@ -1575,7 +1576,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 var objType = function objType(obj) {
   var type = _typeof(obj);
 
-  if (type === 'undefined') return 'undefined';else if (type === 'string' || obj instanceof String) return 'string';else if (type === 'number' || obj instanceof Number) return 'number';else if (type === 'function' || obj instanceof Function) return 'function';else if (!!obj && obj.constructor === Array) return 'array';else if (obj && obj.nodeType === 1) return 'element';else if (type === 'object') return 'object';else return 'unknown';
+  if (type === "undefined") return "undefined";else if (type === "string" || obj instanceof String) return "string";else if (type === "number" || obj instanceof Number) return "number";else if (type === "function" || obj instanceof Function) return "function";else if (!!obj && obj.constructor === Array) return "array";else if (obj && obj.nodeType === 1) return "element";else if (type === "object") return "object";else return "unknown";
 }; // Create an HTML element with optional className, innerHTML, and style.
 
 var createElement = function createElement(tagName, opt) {
@@ -1584,7 +1585,7 @@ var createElement = function createElement(tagName, opt) {
 
   if (opt.innerHTML) {
     el.innerHTML = opt.innerHTML;
-    var scripts = el.getElementsByTagName('script');
+    var scripts = el.getElementsByTagName("script");
 
     for (var i = scripts.length; i-- > 0; null) {
       scripts[i].parentNode.removeChild(scripts[i]);
@@ -1603,23 +1604,23 @@ var cloneNode = function cloneNode(node, javascriptEnabled) {
   var clone = node.nodeType === 3 ? document.createTextNode(node.nodeValue) : node.cloneNode(false);
 
   for (var child = node.firstChild; child; child = child.nextSibling) {
-    if (javascriptEnabled === true || child.nodeType !== 1 || child.nodeName !== 'SCRIPT') {
+    if (javascriptEnabled === true || child.nodeType !== 1 || child.nodeName !== "SCRIPT") {
       clone.appendChild(cloneNode(child, javascriptEnabled));
     }
   }
 
   if (node.nodeType === 1) {
     // Preserve contents/properties of special nodes.
-    if (node.nodeName === 'CANVAS') {
+    if (node.nodeName === "CANVAS") {
       clone.width = node.width;
       clone.height = node.height;
-      clone.getContext('2d').drawImage(node, 0, 0);
-    } else if (node.nodeName === 'TEXTAREA' || node.nodeName === 'SELECT') {
+      clone.getContext("2d").drawImage(node, 0, 0);
+    } else if (node.nodeName === "TEXTAREA" || node.nodeName === "SELECT") {
       clone.value = node.value;
     } // Preserve the node's scroll position when it loads.
 
 
-    clone.addEventListener('load', function () {
+    clone.addEventListener("load", function () {
       clone.scrollTop = node.scrollTop;
       clone.scrollLeft = node.scrollLeft;
     }, true);
@@ -1630,7 +1631,7 @@ var cloneNode = function cloneNode(node, javascriptEnabled) {
 }; // Convert units from px using the conversion value 'k' from jsPDF.
 
 var unitConvert = function unitConvert(obj, k) {
-  if (objType(obj) === 'number') {
+  if (objType(obj) === "number") {
     return obj * 72 / 96 / k;
   } else {
     var newObj = {};
@@ -1644,7 +1645,9 @@ var unitConvert = function unitConvert(obj, k) {
 }; // Convert units to px using the conversion value 'k' from jsPDF.
 
 var toPx = function toPx(val, k) {
-  return Math.floor(val * k / 72 * 96);
+  var floor = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+  var px = val * k / 72 * 96;
+  return floor ? Math.floor(px) : px;
 };
 
 /***/ }),
@@ -1911,8 +1914,8 @@ function toPdfIOS() {
             case 0:
               opt = this.opt;
               root = this.prop.container;
-              pxPageWidth = this.prop.pageSize.inner.px.width;
-              pxPageHeight = this.prop.pageSize.inner.px.height;
+              pxPageWidth = this.prop.pageSize.inner.px.widthExact;
+              pxPageHeight = this.prop.pageSize.inner.px.heightExact;
               clientBoundingRect = root.getBoundingClientRect();
               pxFullHeight = clientBoundingRect.height;
               nPages = Math.ceil(pxFullHeight / pxPageHeight);
@@ -1994,7 +1997,7 @@ function toPdf() {
 
     this.prop.pdf = this.prop.pdf || new jspdf__WEBPACK_IMPORTED_MODULE_10__.jsPDF(opt.jsPDF);
 
-    for (var page = 0; page < nPages - 1; page++) {
+    for (var page = 0; page < nPages; page++) {
       // Trim the final page to reduce file size.
       if (page === nPages - 1 && pxFullHeight % pxPageHeight !== 0) {
         pageCanvas.height = pxFullHeight % pxPageHeight;
@@ -2174,8 +2177,10 @@ Worker.prototype.setPageSize = function setPageSize(pageSize) {
         height: pageSize.height - this.opt.margin[0] - this.opt.margin[2]
       };
       pageSize.inner.px = {
-        width: (0,_utils_js__WEBPACK_IMPORTED_MODULE_12__.toPx)(pageSize.inner.width, pageSize.k),
-        height: (0,_utils_js__WEBPACK_IMPORTED_MODULE_12__.toPx)(pageSize.inner.height, pageSize.k)
+        width: (0,_utils_js__WEBPACK_IMPORTED_MODULE_12__.toPx)(pageSize.inner.width, pageSize.k, true),
+        height: (0,_utils_js__WEBPACK_IMPORTED_MODULE_12__.toPx)(pageSize.inner.height, pageSize.k, true),
+        widthExact: (0,_utils_js__WEBPACK_IMPORTED_MODULE_12__.toPx)(pageSize.inner.width, pageSize.k, false),
+        heightExact: (0,_utils_js__WEBPACK_IMPORTED_MODULE_12__.toPx)(pageSize.inner.height, pageSize.k, false)
       };
       pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
     } // Attach pageSize to this.
