@@ -1435,11 +1435,16 @@ _worker_js__WEBPACK_IMPORTED_MODULE_5__.default.template.opt.pagebreak = {
 };
 
 _worker_js__WEBPACK_IMPORTED_MODULE_5__.default.prototype.toContainer = function toContainer() {
-  return orig.toContainer.call(this).then(function toContainer_pagebreak() {
+  var prereqs = [function waitLoadImages() {
+    var root = this.prop.container;
+    var images = root.querySelectorAll("img");
+    return (0,_utils_js__WEBPACK_IMPORTED_MODULE_6__.loadImages)(images);
+  }];
+  return orig.toContainer.call(this).thenList(prereqs).then(function toContainer_pagebreak() {
     // Setup root element and inner page height.
     var root = this.prop.container; // avoid rounding errors by using the exact height in px
 
-    var pxPageHeight = this.prop.pageSize.inner.px.heightExact; // Check all requested modes.
+    var pxPageHeight = this.opt["html2canvas"] && this.opt["html2canvas"]["width"] ? this.opt["html2canvas"]["width"] * this.prop.pageSize.inner.ratio : this.prop.pageSize.inner.px.heightExact; // Check all requested modes.
 
     var modeSrc = [].concat(this.opt.pagebreak.mode);
     var mode = {
@@ -1490,6 +1495,10 @@ _worker_js__WEBPACK_IMPORTED_MODULE_5__.default.prototype.toContainer = function
         rules[key] = rules[key] || select[key].indexOf(el) !== -1;
       }); // Get element position on the screen.
       // TODO: Subtract the top of the container from clientRect.top/bottom?
+      // var clientRect =
+      //   el.nodeName === "IMG"
+      //     ? el.parentNode.getBoundingClientRect()
+      //     : el.getBoundingClientRect();
 
       var clientRect = el.getBoundingClientRect(); // Avoid: Check if a break happens mid-element.
 
@@ -1505,13 +1514,19 @@ _worker_js__WEBPACK_IMPORTED_MODULE_5__.default.prototype.toContainer = function
 
 
       if (rules.before) {
+        var blockHeight = Math.floor(pxPageHeight - clientRect.top % pxPageHeight);
         var pad = (0,_utils_js__WEBPACK_IMPORTED_MODULE_6__.createElement)("div", {
           style: {
             display: "block",
-            height: Math.floor(pxPageHeight - clientRect.top % pxPageHeight) + "px"
+            height: "".concat(blockHeight, "px")
           }
         });
-        el.parentNode.insertBefore(pad, el);
+
+        if (el.nodeName === "IMG" && el.parentNode.nodeName === "DIV") {
+          el.parentNode.parentNode.insertBefore(pad, el.parentNode);
+        } else {
+          el.parentNode.insertBefore(pad, el);
+        }
       } // After: Create a padding div to fill the remaining page.
 
 
@@ -1543,24 +1558,31 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "createElement": function() { return /* binding */ createElement; },
 /* harmony export */   "cloneNode": function() { return /* binding */ cloneNode; },
 /* harmony export */   "unitConvert": function() { return /* binding */ unitConvert; },
-/* harmony export */   "toPx": function() { return /* binding */ toPx; }
+/* harmony export */   "toPx": function() { return /* binding */ toPx; },
+/* harmony export */   "loadImages": function() { return /* binding */ loadImages; }
 /* harmony export */ });
 /* harmony import */ var core_js_modules_es_number_constructor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.number.constructor.js */ "./node_modules/core-js/modules/es.number.constructor.js");
 /* harmony import */ var core_js_modules_es_number_constructor_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_number_constructor_js__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.symbol.js */ "./node_modules/core-js/modules/es.symbol.js");
-/* harmony import */ var core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.symbol.description.js */ "./node_modules/core-js/modules/es.symbol.description.js");
-/* harmony import */ var core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.object.to-string.js */ "./node_modules/core-js/modules/es.object.to-string.js");
-/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.symbol.iterator.js */ "./node_modules/core-js/modules/es.symbol.iterator.js");
-/* harmony import */ var core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.array.iterator.js */ "./node_modules/core-js/modules/es.array.iterator.js");
-/* harmony import */ var core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/es.string.iterator.js */ "./node_modules/core-js/modules/es.string.iterator.js");
-/* harmony import */ var core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core-js/modules/web.dom-collections.iterator.js */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
-/* harmony import */ var core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.object.to-string.js */ "./node_modules/core-js/modules/es.object.to-string.js");
+/* harmony import */ var core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_promise_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.promise.js */ "./node_modules/core-js/modules/es.promise.js");
+/* harmony import */ var core_js_modules_es_promise_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_promise_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/web.dom-collections.for-each.js */ "./node_modules/core-js/modules/web.dom-collections.for-each.js");
+/* harmony import */ var core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_for_each_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.symbol.js */ "./node_modules/core-js/modules/es.symbol.js");
+/* harmony import */ var core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.symbol.description.js */ "./node_modules/core-js/modules/es.symbol.description.js");
+/* harmony import */ var core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_description_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/es.symbol.iterator.js */ "./node_modules/core-js/modules/es.symbol.iterator.js");
+/* harmony import */ var core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_iterator_js__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core-js/modules/es.array.iterator.js */ "./node_modules/core-js/modules/es.array.iterator.js");
+/* harmony import */ var core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_iterator_js__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core-js/modules/es.string.iterator.js */ "./node_modules/core-js/modules/es.string.iterator.js");
+/* harmony import */ var core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_iterator_js__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core-js/modules/web.dom-collections.iterator.js */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
+/* harmony import */ var core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_iterator_js__WEBPACK_IMPORTED_MODULE_9__);
+
+
 
 
 
@@ -1648,7 +1670,34 @@ var toPx = function toPx(val, k) {
   var floor = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
   var px = val * k / 72 * 96;
   return floor ? Math.floor(px) : px;
-};
+}; // make sure all images finish loading (even though some of them failed to load) then fire the callback
+
+function loadImages(images) {
+  if (images.length > 0) {
+    var loadedImages = 0;
+    var promiseResolve;
+    var promise = new Promise(function (resolve) {
+      promiseResolve = resolve;
+    });
+    images.forEach(function wait_images_loading(img) {
+      var newImg = new Image();
+
+      var onFinishLoading = function onFinishLoading() {
+        loadedImages++;
+
+        if (loadedImages === images.length) {
+          promiseResolve();
+        }
+      };
+
+      newImg.onload = onFinishLoading;
+      newImg.onerror = onFinishLoading;
+      var src = img.getAttribute("src");
+      newImg.src = src;
+    });
+    return promise;
+  }
+}
 
 /***/ }),
 

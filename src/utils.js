@@ -88,3 +88,34 @@ export const toPx = function toPx(val, k, floor = true) {
   const px = ((val * k) / 72) * 96;
   return floor ? Math.floor(px) : px;
 };
+
+// make sure all images finish loading (even though some of them failed to load) then fire the callback
+export function loadImages(images) {
+  if (images.length > 0) {
+    var loadedImages = 0;
+    var promiseResolve;
+
+    var promise = new Promise(function (resolve) {
+      promiseResolve = resolve;
+    });
+
+    images.forEach(function wait_images_loading(img) {
+      var newImg = new Image();
+
+      const onFinishLoading = function () {
+        loadedImages++;
+        if (loadedImages === images.length) {
+          promiseResolve();
+        }
+      };
+
+      newImg.onload = onFinishLoading;
+      newImg.onerror = onFinishLoading;
+
+      var src = img.getAttribute("src");
+      newImg.src = src;
+    });
+
+    return promise;
+  }
+}

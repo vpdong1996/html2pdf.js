@@ -1,5 +1,5 @@
 import Worker from "../worker.js";
-import { objType, createElement } from "../utils.js";
+import { createElement, loadImages } from "../utils.js";
 
 /* Pagebreak plugin:
 
@@ -37,113 +37,138 @@ Worker.template.opt.pagebreak = {
 };
 
 Worker.prototype.toContainer = function toContainer() {
-  return orig.toContainer.call(this).then(function toContainer_pagebreak() {
-    // Setup root element and inner page height.
-    var root = this.prop.container;
-    // avoid rounding errors by using the exact height in px
-    var pxPageHeight = this.prop.pageSize.inner.px.heightExact;
-    // Check all requested modes.
-    var modeSrc = [].concat(this.opt.pagebreak.mode);
-    var mode = {
-      avoidAll: modeSrc.indexOf("avoid-all") !== -1,
-      css: modeSrc.indexOf("css") !== -1,
-      legacy: modeSrc.indexOf("legacy") !== -1,
-    };
+  var prereqs = [
+    function waitLoadImages() {
+      var root = this.prop.container;
+      var images = root.querySelectorAll("img");
 
-    // Get arrays of all explicitly requested elements.
-    var select = {};
-    var self = this;
-    ["before", "after", "avoid"].forEach(function (key) {
-      var all = mode.avoidAll && key === "avoid";
-      select[key] = all ? [] : [].concat(self.opt.pagebreak[key] || []);
-      if (select[key].length > 0) {
-        select[key] = Array.prototype.slice.call(
-          root.querySelectorAll(select[key].join(", "))
-        );
-      }
-    });
+      return loadImages(images);
+    },
+  ];
 
-    // Get all legacy page-break elements.
-    var legacyEls = root.querySelectorAll(".html2pdf__page-break");
-    legacyEls = Array.prototype.slice.call(legacyEls);
-
-    // Loop through all elements.
-    var els = root.querySelectorAll("*");
-    Array.prototype.forEach.call(els, function pagebreak_loop(el) {
-      // Setup pagebreak rules based on legacy and avoidAll modes.
-      var rules = {
-        before: false,
-        after: mode.legacy && legacyEls.indexOf(el) !== -1,
-        avoid: mode.avoidAll,
+  return orig.toContainer
+    .call(this)
+    .thenList(prereqs)
+    .then(function toContainer_pagebreak() {
+      // Setup root element and inner page height.
+      var root = this.prop.container;
+      // avoid rounding errors by using the exact height in px
+      var pxPageHeight =
+        this.opt["html2canvas"] && this.opt["html2canvas"]["width"]
+          ? this.opt["html2canvas"]["width"] * this.prop.pageSize.inner.ratio
+          : this.prop.pageSize.inner.px.heightExact;
+      // Check all requested modes.
+      var modeSrc = [].concat(this.opt.pagebreak.mode);
+      var mode = {
+        avoidAll: modeSrc.indexOf("avoid-all") !== -1,
+        css: modeSrc.indexOf("css") !== -1,
+        legacy: modeSrc.indexOf("legacy") !== -1,
       };
 
-      // Add rules for css mode.
-      if (mode.css) {
-        // TODO: Check if this is valid with iFrames.
-        var style = window.getComputedStyle(el);
-        // TODO: Handle 'left' and 'right' correctly.
-        // TODO: Add support for 'avoid' on breakBefore/After.
-        var breakOpt = ["always", "page", "left", "right"];
-        var avoidOpt = ["avoid", "avoid-page"];
-        rules = {
-          before:
-            rules.before ||
-            breakOpt.indexOf(style.breakBefore || style.pageBreakBefore) !== -1,
-          after:
-            rules.after ||
-            breakOpt.indexOf(style.breakAfter || style.pageBreakAfter) !== -1,
-          avoid:
-            rules.avoid ||
-            avoidOpt.indexOf(style.breakInside || style.pageBreakInside) !== -1,
-        };
-      }
-
-      // Add rules for explicit requests.
-      Object.keys(rules).forEach(function (key) {
-        rules[key] = rules[key] || select[key].indexOf(el) !== -1;
+      // Get arrays of all explicitly requested elements.
+      var select = {};
+      var self = this;
+      ["before", "after", "avoid"].forEach(function (key) {
+        var all = mode.avoidAll && key === "avoid";
+        select[key] = all ? [] : [].concat(self.opt.pagebreak[key] || []);
+        if (select[key].length > 0) {
+          select[key] = Array.prototype.slice.call(
+            root.querySelectorAll(select[key].join(", "))
+          );
+        }
       });
 
-      // Get element position on the screen.
-      // TODO: Subtract the top of the container from clientRect.top/bottom?
-      var clientRect = el.getBoundingClientRect();
+      // Get all legacy page-break elements.
+      var legacyEls = root.querySelectorAll(".html2pdf__page-break");
+      legacyEls = Array.prototype.slice.call(legacyEls);
 
-      // Avoid: Check if a break happens mid-element.
-      if (rules.avoid && !rules.before) {
-        var startPage = Math.floor(clientRect.top / pxPageHeight);
-        var endPage = Math.floor(clientRect.bottom / pxPageHeight);
-        var nPages =
-          Math.abs(clientRect.bottom - clientRect.top) / pxPageHeight;
+      // Loop through all elements.
+      var els = root.querySelectorAll("*");
+      Array.prototype.forEach.call(els, function pagebreak_loop(el) {
+        // Setup pagebreak rules based on legacy and avoidAll modes.
+        var rules = {
+          before: false,
+          after: mode.legacy && legacyEls.indexOf(el) !== -1,
+          avoid: mode.avoidAll,
+        };
 
-        // Turn on rules.before if the el is broken and is at most one page long.
-        if (endPage !== startPage && nPages <= 1) {
-          rules.before = true;
+        // Add rules for css mode.
+        if (mode.css) {
+          // TODO: Check if this is valid with iFrames.
+          var style = window.getComputedStyle(el);
+          // TODO: Handle 'left' and 'right' correctly.
+          // TODO: Add support for 'avoid' on breakBefore/After.
+          var breakOpt = ["always", "page", "left", "right"];
+          var avoidOpt = ["avoid", "avoid-page"];
+          rules = {
+            before:
+              rules.before ||
+              breakOpt.indexOf(style.breakBefore || style.pageBreakBefore) !==
+                -1,
+            after:
+              rules.after ||
+              breakOpt.indexOf(style.breakAfter || style.pageBreakAfter) !== -1,
+            avoid:
+              rules.avoid ||
+              avoidOpt.indexOf(style.breakInside || style.pageBreakInside) !==
+                -1,
+          };
         }
-      }
 
-      // Before: Create a padding div to push the element to the next page.
-      if (rules.before) {
-        var pad = createElement("div", {
-          style: {
-            display: "block",
-            height:
-              Math.floor(pxPageHeight - (clientRect.top % pxPageHeight)) + "px",
-          },
+        // Add rules for explicit requests.
+        Object.keys(rules).forEach(function (key) {
+          rules[key] = rules[key] || select[key].indexOf(el) !== -1;
         });
-        el.parentNode.insertBefore(pad, el);
-      }
+        // Get element position on the screen.
+        // TODO: Subtract the top of the container from clientRect.top/bottom?
+        // var clientRect =
+        //   el.nodeName === "IMG"
+        //     ? el.parentNode.getBoundingClientRect()
+        //     : el.getBoundingClientRect();
+        var clientRect = el.getBoundingClientRect();
+        // Avoid: Check if a break happens mid-element.
+        if (rules.avoid && !rules.before) {
+          var startPage = Math.floor(clientRect.top / pxPageHeight);
+          var endPage = Math.floor(clientRect.bottom / pxPageHeight);
+          var nPages =
+            Math.abs(clientRect.bottom - clientRect.top) / pxPageHeight;
+          // Turn on rules.before if the el is broken and is at most one page long.
+          if (endPage !== startPage && nPages <= 1) {
+            rules.before = true;
+          }
+        }
 
-      // After: Create a padding div to fill the remaining page.
-      if (rules.after) {
-        var pad = createElement("div", {
-          style: {
-            display: "block",
-            height:
-              Math.floor(pxPageHeight - (clientRect.bottom % pxPageHeight)) +
-              "px",
-          },
-        });
-        el.parentNode.insertBefore(pad, el.nextSibling);
-      }
+        // Before: Create a padding div to push the element to the next page.
+        if (rules.before) {
+          let blockHeight = Math.floor(
+            pxPageHeight - (clientRect.top % pxPageHeight)
+          );
+
+          var pad = createElement("div", {
+            style: {
+              display: "block",
+              height: `${blockHeight}px`,
+            },
+          });
+          if (el.nodeName === "IMG" && el.parentNode.nodeName === "DIV") {
+            el.parentNode.parentNode.insertBefore(pad, el.parentNode);
+          } else {
+            el.parentNode.insertBefore(pad, el);
+          }
+        }
+
+        // After: Create a padding div to fill the remaining page.
+        if (rules.after) {
+          var pad = createElement("div", {
+            style: {
+              display: "block",
+              height:
+                Math.floor(pxPageHeight - (clientRect.bottom % pxPageHeight)) +
+                "px",
+            },
+          });
+          el.parentNode.insertBefore(pad, el.nextSibling);
+        }
+      });
     });
-  });
 };
