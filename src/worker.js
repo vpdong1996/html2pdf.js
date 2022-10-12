@@ -213,6 +213,7 @@ function toPdfIOS() {
 
   return this.thenList(prereqs).then(async function toPdf_pagebreak_internal() {
     var opt = this.opt;
+    var haveHeader = opt.haveHeader;
     var root = this.prop.container;
     var pxPageWidth = this.prop.pageSize.inner.px.widthExact;
     var pxPageHeight = this.prop.pageSize.inner.px.heightExact;
@@ -252,7 +253,7 @@ function toPdfIOS() {
         imgData,
         opt.image.type,
         opt.margin[1],
-        opt.margin[0],
+        haveHeader && page === 0 ? 0 : opt.margin[0],
         this.prop.pageSize.inner.width,
         this.prop.pageSize.inner.height
       );
@@ -275,7 +276,7 @@ function toPdf() {
     // Create local copies of frequently used properties.
     var canvas = this.prop.canvas;
     var opt = this.opt;
-
+    var haveHeader = opt.haveHeader;
     // Calculate the number of pages.
     var pxFullHeight = canvas.height;
     var pxPageHeight = Math.floor(
@@ -321,7 +322,7 @@ function toPdf() {
         imgData,
         opt.image.type,
         opt.margin[1],
-        opt.margin[0],
+        haveHeader && page === 0 ? 0 : opt.margin[0],
         this.prop.pageSize.inner.width,
         pageHeight
       );

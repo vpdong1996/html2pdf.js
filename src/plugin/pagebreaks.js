@@ -143,11 +143,10 @@ Worker.prototype.toContainer = function toContainer() {
           let blockHeight = Math.floor(
             pxPageHeight - (clientRect.top % pxPageHeight)
           );
-
           var pad = createElement("div", {
             style: {
               display: "block",
-              height: `${blockHeight}px`,
+              height: `${blockHeight + 1}px`,
             },
           });
           if (el.nodeName === "IMG" && el.parentNode.nodeName === "DIV") {
